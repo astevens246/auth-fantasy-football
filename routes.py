@@ -1,5 +1,5 @@
 from flask import render_template, redirect, url_for, flash
-from flask_login import login_user, login_required, current_user
+from flask_login import login_user, logout_user, login_required, current_user
 from app import app, db
 from models import User
 from forms import LoginForm, SignupForm
@@ -42,6 +42,13 @@ def signup():
         flash("Account created!", "success")
         return redirect(url_for("teams_index"))
     return render_template("signup.html", form=form)
+
+
+@app.route("/logout")
+@login_required
+def logout():
+    logout_user()
+    return redirect(url_for("login"))
 
 
 @app.route("/teams")
