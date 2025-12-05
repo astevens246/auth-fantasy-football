@@ -61,16 +61,55 @@ def logout():
 @app.route("/teams")
 @login_required
 def teams_index():
-    my_teams = Team.query.filter_by(user_id=current_user.id).all()
+    from datetime import date
+
+    season_start = date(2025, 9, 1)
+
+    # Get active team (most recent team created after season start)
+    active_team = (
+        Team.query.filter_by(user_id=current_user.id)
+        .filter(Team.created_at >= season_start)
+        .order_by(Team.created_at.desc())
+        .first()
+    )
+
+    # Get past teams (created before season start)
+    past_teams = (
+        Team.query.filter_by(user_id=current_user.id)
+        .filter(Team.created_at < season_start)
+        .order_by(Team.created_at.desc())
+        .all()
+    )
+
     all_teams = Team.query.all()
-    return render_template("teams/index.html", my_teams=my_teams, all_teams=all_teams)
+    return render_template(
+        "teams/index.html",
+        active_team=active_team,
+        past_teams=past_teams,
+        all_teams=all_teams,
+    )
 
 
 @app.route("/teams/new", methods=["GET", "POST"])
 @login_required
 def teams_new():
+    from datetime import date
+
+    season_start = date(2025, 9, 1)
+
     form = TeamForm()
     if form.validate_on_submit():
+        # Check if user already has an active team
+        existing_active = (
+            Team.query.filter_by(user_id=current_user.id)
+            .filter(Team.created_at >= season_start)
+            .first()
+        )
+        if existing_active:
+            flash("You already have an active team for this season!", "warning")
+            return redirect(url_for("teams_show", id=existing_active.id))
+
+        # Create new team
         team = Team(name=form.name.data, user_id=current_user.id)
         db.session.add(team)
         db.session.commit()
@@ -84,6 +123,9 @@ def teams_new():
 def teams_show(id):
     team = Team.query.get_or_404(id)
     is_owner = team.user_id == current_user.id
+    can_edit = (
+        is_owner and team.is_active()
+    )  # Can only edit if owner and team is active
 
     # Get players on this team, organized by position
     all_players = Player.query.filter_by(team_id=team.id).all()
@@ -115,6 +157,7 @@ def teams_show(id):
         "teams/show.html",
         team=team,
         is_owner=is_owner,
+        can_edit=can_edit,
         players_qb=players_qb,
         players_rb=players_rb,
         players_wr=players_wr,
@@ -127,10 +170,13 @@ def teams_show(id):
 @login_required
 def teams_edit(id):
     team = Team.query.get_or_404(id)
-    # Authorization: only team owner can edit
+    # Authorization: only team owner can edit, and only if team is active
     if team.user_id != current_user.id:
         flash("You can only edit your own team!", "danger")
         return redirect(url_for("teams_index"))
+    if not team.is_active():
+        flash("This team is too old to edit!", "warning")
+        return redirect(url_for("teams_show", id=team.id))
 
     form = TeamForm()
     if form.validate_on_submit():
@@ -237,15 +283,24 @@ def players_browse():
         .all()
     )
 
-    # Get user's teams for "Add to Team" dropdown
-    teams = Team.query.filter_by(user_id=current_user.id).all()
+    # Get user's active team only (date-based)
+    from datetime import date
+
+    season_start = date(2025, 9, 1)
+    active_team = (
+        Team.query.filter_by(user_id=current_user.id)
+        .filter(Team.created_at >= season_start)
+        .order_by(Team.created_at.desc())
+        .first()
+    )
+
     return render_template(
         "players/browse.html",
         players_qb=players_qb,
         players_rb=players_rb,
         players_wr=players_wr,
         players_te=players_te,
-        teams=teams,
+        active_team=active_team,
     )
 
 
@@ -253,9 +308,12 @@ def players_browse():
 @login_required
 def players_add_to_team(team_id, player_id):
     team = Team.query.get_or_404(team_id)
-    # Authorization: only team owner can add players
+    # Authorization: only team owner can add players, and only if team is active
     if team.user_id != current_user.id:
         flash("You can only add players to your own team!", "danger")
+        return redirect(url_for("teams_index"))
+    if not team.is_active():
+        flash("This team is too old to edit!", "warning")
         return redirect(url_for("teams_index"))
 
     player = Player.query.get_or_404(player_id)
@@ -304,6 +362,9 @@ def players_remove_from_team(team_id, player_id):
     if team.user_id != current_user.id:
         flash("You can only remove players from your own team!", "danger")
         return redirect(url_for("teams_index"))
+    if not team.is_active():
+        flash("This team is too old to edit!", "warning")
+        return redirect(url_for("teams_show", id=team_id))
 
     player = Player.query.get_or_404(player_id)
     # Verify player is on this team
