@@ -150,8 +150,15 @@ def players_browse():
                 name = row["PLAYER NAME"].strip()
                 pos_full = row["POS"].strip()
                 nfl_team = row["TEAM"].strip()
+                rank_str = row["RK"].strip()
                 position = "".join([c for c in pos_full if c.isalpha()]).upper()
                 if position in ["QB", "RB", "WR", "TE"]:
+                    # Parse rank (handle empty strings)
+                    try:
+                        rank = int(rank_str) if rank_str else None
+                    except ValueError:
+                        rank = None
+
                     # Check if player already exists
                     existing = Player.query.filter_by(
                         name=name, position=position, nfl_team=nfl_team
@@ -161,29 +168,42 @@ def players_browse():
                             name=name,
                             position=position,
                             nfl_team=nfl_team,
+                            rank=rank,
                             fantasy_points=None,
                             team_id=None,
                         )
                         db.session.add(player)
                         count += 1
                     else:
+                        # Update rank from CSV if provided (always use latest CSV data)
+                        if rank is not None:
+                            existing.rank = rank
                         skipped += 1
         db.session.commit()
         if count > 0:
             flash(f"Imported {count} new players from CSV!", "success")
 
-    # Query: get all players where team_id is None, organized by position
+    # Query: get all players where team_id is None, organized by position and ranked
+    # Players are unique across ALL teams - if team_id is set, they're unavailable
     players_qb = (
-        Player.query.filter_by(team_id=None, position="QB").order_by(Player.name).all()
+        Player.query.filter_by(team_id=None, position="QB")
+        .order_by(Player.rank, Player.name)
+        .all()
     )
     players_rb = (
-        Player.query.filter_by(team_id=None, position="RB").order_by(Player.name).all()
+        Player.query.filter_by(team_id=None, position="RB")
+        .order_by(Player.rank, Player.name)
+        .all()
     )
     players_wr = (
-        Player.query.filter_by(team_id=None, position="WR").order_by(Player.name).all()
+        Player.query.filter_by(team_id=None, position="WR")
+        .order_by(Player.rank, Player.name)
+        .all()
     )
     players_te = (
-        Player.query.filter_by(team_id=None, position="TE").order_by(Player.name).all()
+        Player.query.filter_by(team_id=None, position="TE")
+        .order_by(Player.rank, Player.name)
+        .all()
     )
 
     # Get user's teams for "Add to Team" dropdown
@@ -208,7 +228,13 @@ def players_add_to_team(team_id, player_id):
         return redirect(url_for("teams_index"))
 
     player = Player.query.get_or_404(player_id)
-    # Add player to team
+
+    # Validation: ensure player is available (not already on a team)
+    if player.team_id is not None:
+        flash(f"{player.name} is already on a team!", "danger")
+        return redirect(url_for("players_browse"))
+
+    # Add player to team (players are unique across ALL teams)
     player.team_id = team_id
     db.session.commit()
     flash(f"{player.name} added to {team.name}!", "success")
