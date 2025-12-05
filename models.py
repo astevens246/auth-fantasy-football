@@ -43,6 +43,7 @@ class Player(db.Model):
     name = db.Column(db.String(100), nullable=False)
     position = db.Column(db.String(10), nullable=False)
     nfl_team = db.Column(db.String(10), nullable=False)
+    rank = db.Column(db.Integer, nullable=True)
     fantasy_points = db.Column(db.Integer, nullable=True)
     team_id = db.Column(db.Integer, db.ForeignKey("team.id"), nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
