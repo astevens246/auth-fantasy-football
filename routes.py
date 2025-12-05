@@ -172,11 +172,30 @@ def players_browse():
         if count > 0:
             flash(f"Imported {count} new players from CSV!", "success")
 
-    # Query: get all players where team_id is None
-    players = Player.query.filter_by(team_id=None).all()
+    # Query: get all players where team_id is None, organized by position
+    players_qb = (
+        Player.query.filter_by(team_id=None, position="QB").order_by(Player.name).all()
+    )
+    players_rb = (
+        Player.query.filter_by(team_id=None, position="RB").order_by(Player.name).all()
+    )
+    players_wr = (
+        Player.query.filter_by(team_id=None, position="WR").order_by(Player.name).all()
+    )
+    players_te = (
+        Player.query.filter_by(team_id=None, position="TE").order_by(Player.name).all()
+    )
+
     # Get user's teams for "Add to Team" dropdown
     teams = Team.query.filter_by(user_id=current_user.id).all()
-    return render_template("players/browse.html", players=players, teams=teams)
+    return render_template(
+        "players/browse.html",
+        players_qb=players_qb,
+        players_rb=players_rb,
+        players_wr=players_wr,
+        players_te=players_te,
+        teams=teams,
+    )
 
 
 @app.route("/teams/<int:team_id>/players/<int:player_id>/add", methods=["POST"])
@@ -193,7 +212,7 @@ def players_add_to_team(team_id, player_id):
     player.team_id = team_id
     db.session.commit()
     flash(f"{player.name} added to {team.name}!", "success")
-    return redirect(url_for("teams_show", id=team_id))
+    return redirect(url_for("players_browse"))
 
 
 @app.route("/teams/<int:team_id>/players/<int:player_id>/remove", methods=["POST"])

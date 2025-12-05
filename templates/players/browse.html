@@ -2,28 +2,109 @@
 <h1>Browse Players</h1>
 <a href="{{ url_for('teams_index') }}">Back to My Teams</a>
 
-{% if teams %} {% if players %}
-<ul>
-  {% for player in players %}
-  <li>
-    <strong>{{ player.name }}</strong> - {{ player.position }} - {{
-    player.nfl_team }}
-    <span>Add to: </span>
-    {% for team in teams %}
-    <form
-      method="POST"
-      action="{{ url_for('players_add_to_team', team_id=team.id, player_id=player.id) }}"
-      style="display: inline"
-    >
-      <button type="submit">{{ team.name }}</button>
-    </form>
-    {% endfor %}
-  </li>
-  {% endfor %}
-</ul>
+{% if teams %}
+<div style="display: flex; gap: 20px">
+  <!-- Quarterbacks Column -->
+  <div style="flex: 1">
+    <h2>QB</h2>
+    {% if players_qb %}
+    <ul>
+      {% for player in players_qb %}
+      <li>
+        <strong>{{ player.name }}</strong> - {{ player.nfl_team }} {% for team
+        in teams %}
+        <form
+          method="POST"
+          action="{{ url_for('players_add_to_team', team_id=team.id, player_id=player.id) }}"
+          style="display: inline"
+        >
+          <button type="submit">+</button>
+        </form>
+        {% endfor %}
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p>No QBs available</p>
+    {% endif %}
+  </div>
+
+  <!-- Running Backs Column -->
+  <div style="flex: 1">
+    <h2>RB</h2>
+    {% if players_rb %}
+    <ul>
+      {% for player in players_rb %}
+      <li>
+        <strong>{{ player.name }}</strong> - {{ player.nfl_team }} {% for team
+        in teams %}
+        <form
+          method="POST"
+          action="{{ url_for('players_add_to_team', team_id=team.id, player_id=player.id) }}"
+          style="display: inline"
+        >
+          <button type="submit">+</button>
+        </form>
+        {% endfor %}
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p>No RBs available</p>
+    {% endif %}
+  </div>
+
+  <!-- Wide Receivers Column -->
+  <div style="flex: 1">
+    <h2>WR</h2>
+    {% if players_wr %}
+    <ul>
+      {% for player in players_wr %}
+      <li>
+        <strong>{{ player.name }}</strong> - {{ player.nfl_team }} {% for team
+        in teams %}
+        <form
+          method="POST"
+          action="{{ url_for('players_add_to_team', team_id=team.id, player_id=player.id) }}"
+          style="display: inline"
+        >
+          <button type="submit">+</button>
+        </form>
+        {% endfor %}
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p>No WRs available</p>
+    {% endif %}
+  </div>
+
+  <!-- Tight Ends Column -->
+  <div style="flex: 1">
+    <h2>TE</h2>
+    {% if players_te %}
+    <ul>
+      {% for player in players_te %}
+      <li>
+        <strong>{{ player.name }}</strong> - {{ player.nfl_team }} {% for team
+        in teams %}
+        <form
+          method="POST"
+          action="{{ url_for('players_add_to_team', team_id=team.id, player_id=player.id) }}"
+          style="display: inline"
+        >
+          <button type="submit">+</button>
+        </form>
+        {% endfor %}
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p>No TEs available</p>
+    {% endif %}
+  </div>
+</div>
 {% else %}
-<p>No available players. All players are on teams!</p>
-{% endif %} {% else %}
 <p>
   You need to <a href="{{ url_for('teams_new') }}">create a team</a> before you
   can add players.
