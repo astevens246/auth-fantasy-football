@@ -234,6 +234,31 @@ def players_add_to_team(team_id, player_id):
         flash(f"{player.name} is already on a team!", "danger")
         return redirect(url_for("players_browse"))
 
+    # Roster limits
+    MAX_TOTAL_PLAYERS = 8
+    MAX_PER_POSITION = {"QB": 2, "RB": 3, "WR": 3, "TE": 2}
+
+    # Get current roster
+    current_players = Player.query.filter_by(team_id=team_id).all()
+    current_count = len(current_players)
+
+    # Check total player limit
+    if current_count >= MAX_TOTAL_PLAYERS:
+        flash(
+            f"Team roster is full! Maximum {MAX_TOTAL_PLAYERS} players allowed.",
+            "danger",
+        )
+        return redirect(url_for("players_browse"))
+
+    # Check position limit
+    position_count = sum(1 for p in current_players if p.position == player.position)
+    if position_count >= MAX_PER_POSITION.get(player.position, 99):
+        flash(
+            f"Maximum {MAX_PER_POSITION.get(player.position)} {player.position}s allowed per team!",
+            "danger",
+        )
+        return redirect(url_for("players_browse"))
+
     # Add player to team (players are unique across ALL teams)
     player.team_id = team_id
     db.session.commit()
