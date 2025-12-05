@@ -37,6 +37,13 @@ class Team(db.Model):
     # One-to-many relationship with Player
     players = db.relationship("Player", backref="team", lazy=True)
 
+    def is_active(self):
+        """Check if team is within the active season (created after season start)"""
+        from datetime import date
+
+        season_start = date(2025, 9, 1)  # Adjust season start date as needed
+        return self.created_at.date() >= season_start
+
 
 class Player(db.Model):
     id = db.Column(db.Integer, primary_key=True)
