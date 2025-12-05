@@ -1,4 +1,5 @@
 from flask import render_template, redirect, url_for, flash, request
+import os
 from flask_login import login_user, logout_user, login_required, current_user
 from app import app, db
 from models import User, Team, Player
@@ -134,33 +135,42 @@ def teams_delete(id):
 @app.route("/players")
 @login_required
 def players_browse():
-    # Hard-coded test players - ensure they exist in database
-    test_players_data = [
-        {"name": "Patrick Mahomes", "position": "QB", "nfl_team": "KC"},
-        {"name": "Josh Allen", "position": "QB", "nfl_team": "BUF"},
-        {"name": "Christian McCaffrey", "position": "RB", "nfl_team": "SF"},
-        {"name": "Derrick Henry", "position": "RB", "nfl_team": "BAL"},
-        {"name": "Tyreek Hill", "position": "WR", "nfl_team": "MIA"},
-        {"name": "CeeDee Lamb", "position": "WR", "nfl_team": "DAL"},
-        {"name": "Travis Kelce", "position": "TE", "nfl_team": "KC"},
-        {"name": "Mark Andrews", "position": "TE", "nfl_team": "BAL"},
-    ]
+    # Import from CSV if file exists (skip duplicates)
+    csv_filename = "Fantasy_Football_2025_Draft.csv"
+    if os.path.exists(csv_filename):
+        import csv
 
-    # Create players if they don't exist
-    for player_data in test_players_data:
-        existing = Player.query.filter_by(
-            name=player_data["name"], position=player_data["position"]
-        ).first()
-        if not existing:
-            player = Player(
-                name=player_data["name"],
-                position=player_data["position"],
-                nfl_team=player_data["nfl_team"],
-                fantasy_points=None,
-                team_id=None,
-            )
-            db.session.add(player)
-    db.session.commit()
+        count = 0
+        skipped = 0
+        with open(csv_filename, "r", encoding="utf-8") as file:
+            # Skip first line (title), then read headers
+            next(file)  # Skip title line
+            reader = csv.DictReader(file)
+            for row in reader:
+                name = row["PLAYER NAME"].strip()
+                pos_full = row["POS"].strip()
+                nfl_team = row["TEAM"].strip()
+                position = "".join([c for c in pos_full if c.isalpha()]).upper()
+                if position in ["QB", "RB", "WR", "TE"]:
+                    # Check if player already exists
+                    existing = Player.query.filter_by(
+                        name=name, position=position, nfl_team=nfl_team
+                    ).first()
+                    if not existing:
+                        player = Player(
+                            name=name,
+                            position=position,
+                            nfl_team=nfl_team,
+                            fantasy_points=None,
+                            team_id=None,
+                        )
+                        db.session.add(player)
+                        count += 1
+                    else:
+                        skipped += 1
+        db.session.commit()
+        if count > 0:
+            flash(f"Imported {count} new players from CSV!", "success")
 
     # Query: get all players where team_id is None
     players = Player.query.filter_by(team_id=None).all()
