@@ -87,9 +87,41 @@ def teams_show(id):
         flash("You can only view your own team!", "danger")
         return redirect(url_for("teams_index"))
 
-    # Get players on this team
-    players = Player.query.filter_by(team_id=team.id).all()
-    return render_template("teams/show.html", team=team, players=players)
+    # Get players on this team, organized by position
+    all_players = Player.query.filter_by(team_id=team.id).all()
+    players_qb = [p for p in all_players if p.position == "QB"]
+    players_rb = [p for p in all_players if p.position == "RB"]
+    players_wr = [p for p in all_players if p.position == "WR"]
+    players_te = [p for p in all_players if p.position == "TE"]
+
+    # Roster limits for display
+    MAX_TOTAL_PLAYERS = 8
+    MAX_PER_POSITION = {"QB": 2, "RB": 3, "WR": 3, "TE": 2}
+
+    # Calculate roster stats
+    total_players = len(all_players)
+    roster_stats = {
+        "total": total_players,
+        "max_total": MAX_TOTAL_PLAYERS,
+        "qb": len(players_qb),
+        "max_qb": MAX_PER_POSITION["QB"],
+        "rb": len(players_rb),
+        "max_rb": MAX_PER_POSITION["RB"],
+        "wr": len(players_wr),
+        "max_wr": MAX_PER_POSITION["WR"],
+        "te": len(players_te),
+        "max_te": MAX_PER_POSITION["TE"],
+    }
+
+    return render_template(
+        "teams/show.html",
+        team=team,
+        players_qb=players_qb,
+        players_rb=players_rb,
+        players_wr=players_wr,
+        players_te=players_te,
+        roster_stats=roster_stats,
+    )
 
 
 @app.route("/teams/<int:id>/edit", methods=["GET", "POST"])

@@ -2,45 +2,114 @@
 <h1>{{ team.name }}</h1>
 <p>Created: {{ team.created_at.strftime('%Y-%m-%d') }}</p>
 
-<h2>Players</h2>
-{% if players %}
-<ul>
-  {% for player in players %}
-  <li>
-    {{ player.name }} - {{ player.position }} - {{ player.nfl_team }}
-    <form
-      method="POST"
-      action="{{ url_for('players_remove_from_team', team_id=team.id, player_id=player.id) }}"
-      style="display: inline"
-    >
-      <button
-        type="submit"
-        onclick="return confirm('Remove {{ player.name }} from {{ team.name }}?')"
-      >
-        Remove
-      </button>
-    </form>
-  </li>
-  {% endfor %}
-</ul>
-{% else %}
+<h2>Roster ({{ roster_stats.total }}/{{ roster_stats.max_total }})</h2>
 <p>
-  No players on your team yet.
-  <a href="{{ url_for('players_browse') }}">Browse players</a> to add some!
+  QB: {{ roster_stats.qb }}/{{ roster_stats.max_qb }} | RB: {{ roster_stats.rb }}/{{ roster_stats.max_rb }} | 
+  WR: {{ roster_stats.wr }}/{{ roster_stats.max_wr }} | TE: {{ roster_stats.te }}/{{ roster_stats.max_te }}
 </p>
-{% endif %}
 
-<a href="{{ url_for('players_browse') }}">Add More Players</a>
+<div style="display: flex; gap: 20px">
+  <!-- Quarterbacks -->
+  <div style="flex: 1">
+    <h3>QB ({{ roster_stats.qb }}/{{ roster_stats.max_qb }})</h3>
+    {% if players_qb %}
+    <ul>
+      {% for player in players_qb %}
+      <li>
+        {% if player.rank %}#{{ player.rank }} {% endif %}{{ player.name }} - {{ player.nfl_team }}
+        <form
+          method="POST"
+          action="{{ url_for('players_remove_from_team', team_id=team.id, player_id=player.id) }}"
+          style="display: inline"
+        >
+          <button type="submit" onclick="return confirm('Remove {{ player.name }}?')">Remove</button>
+        </form>
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p>No QBs</p>
+    {% endif %}
+  </div>
 
-<a href="{{ url_for('teams_edit', id=team.id) }}">Edit Team</a>
+  <!-- Running Backs -->
+  <div style="flex: 1">
+    <h3>RB ({{ roster_stats.rb }}/{{ roster_stats.max_rb }})</h3>
+    {% if players_rb %}
+    <ul>
+      {% for player in players_rb %}
+      <li>
+        {% if player.rank %}#{{ player.rank }} {% endif %}{{ player.name }} - {{ player.nfl_team }}
+        <form
+          method="POST"
+          action="{{ url_for('players_remove_from_team', team_id=team.id, player_id=player.id) }}"
+          style="display: inline"
+        >
+          <button type="submit" onclick="return confirm('Remove {{ player.name }}?')">Remove</button>
+        </form>
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p>No RBs</p>
+    {% endif %}
+  </div>
+
+  <!-- Wide Receivers -->
+  <div style="flex: 1">
+    <h3>WR ({{ roster_stats.wr }}/{{ roster_stats.max_wr }})</h3>
+    {% if players_wr %}
+    <ul>
+      {% for player in players_wr %}
+      <li>
+        {% if player.rank %}#{{ player.rank }} {% endif %}{{ player.name }} - {{ player.nfl_team }}
+        <form
+          method="POST"
+          action="{{ url_for('players_remove_from_team', team_id=team.id, player_id=player.id) }}"
+          style="display: inline"
+        >
+          <button type="submit" onclick="return confirm('Remove {{ player.name }}?')">Remove</button>
+        </form>
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p>No WRs</p>
+    {% endif %}
+  </div>
+
+  <!-- Tight Ends -->
+  <div style="flex: 1">
+    <h3>TE ({{ roster_stats.te }}/{{ roster_stats.max_te }})</h3>
+    {% if players_te %}
+    <ul>
+      {% for player in players_te %}
+      <li>
+        {% if player.rank %}#{{ player.rank }} {% endif %}{{ player.name }} - {{ player.nfl_team }}
+        <form
+          method="POST"
+          action="{{ url_for('players_remove_from_team', team_id=team.id, player_id=player.id) }}"
+          style="display: inline"
+        >
+          <button type="submit" onclick="return confirm('Remove {{ player.name }}?')">Remove</button>
+        </form>
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p>No TEs</p>
+    {% endif %}
+  </div>
+</div>
+
+<a href="{{ url_for('players_browse') }}">Add More Players</a> |
+<a href="{{ url_for('teams_edit', id=team.id) }}">Edit Team</a> |
 <form
   method="POST"
   action="{{ url_for('teams_delete', id=team.id) }}"
   style="display: inline"
 >
-  <button type="submit" onclick="return confirm('Delete team?')">
-    Delete Team
-  </button>
+  <button type="submit" onclick="return confirm('Delete team?')">Delete Team</button>
 </form>
 <a href="{{ url_for('teams_index') }}">Back to My Teams</a>
 {% endblock %}
