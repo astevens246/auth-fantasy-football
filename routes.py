@@ -134,9 +134,39 @@ def teams_delete(id):
 @app.route("/players")
 @login_required
 def players_browse():
+    # Hard-coded test players - ensure they exist in database
+    test_players_data = [
+        {"name": "Patrick Mahomes", "position": "QB", "nfl_team": "KC"},
+        {"name": "Josh Allen", "position": "QB", "nfl_team": "BUF"},
+        {"name": "Christian McCaffrey", "position": "RB", "nfl_team": "SF"},
+        {"name": "Derrick Henry", "position": "RB", "nfl_team": "BAL"},
+        {"name": "Tyreek Hill", "position": "WR", "nfl_team": "MIA"},
+        {"name": "CeeDee Lamb", "position": "WR", "nfl_team": "DAL"},
+        {"name": "Travis Kelce", "position": "TE", "nfl_team": "KC"},
+        {"name": "Mark Andrews", "position": "TE", "nfl_team": "BAL"},
+    ]
+
+    # Create players if they don't exist
+    for player_data in test_players_data:
+        existing = Player.query.filter_by(
+            name=player_data["name"], position=player_data["position"]
+        ).first()
+        if not existing:
+            player = Player(
+                name=player_data["name"],
+                position=player_data["position"],
+                nfl_team=player_data["nfl_team"],
+                fantasy_points=None,
+                team_id=None,
+            )
+            db.session.add(player)
+    db.session.commit()
+
     # Query: get all players where team_id is None
     players = Player.query.filter_by(team_id=None).all()
-    return render_template("players/browse.html", players=players)
+    # Get user's teams for "Add to Team" dropdown
+    teams = Team.query.filter_by(user_id=current_user.id).all()
+    return render_template("players/browse.html", players=players, teams=teams)
 
 
 @app.route("/teams/<int:team_id>/players/<int:player_id>/add", methods=["POST"])

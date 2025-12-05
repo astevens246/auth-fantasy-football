@@ -6,12 +6,31 @@
 {% if players %}
 <ul>
   {% for player in players %}
-  <li>{{ player.name }} - {{ player.position }} - {{ player.nfl_team }}</li>
+  <li>
+    {{ player.name }} - {{ player.position }} - {{ player.nfl_team }}
+    <form
+      method="POST"
+      action="{{ url_for('players_remove_from_team', team_id=team.id, player_id=player.id) }}"
+      style="display: inline"
+    >
+      <button
+        type="submit"
+        onclick="return confirm('Remove {{ player.name }} from {{ team.name }}?')"
+      >
+        Remove
+      </button>
+    </form>
+  </li>
   {% endfor %}
 </ul>
 {% else %}
-<p>No players on your team yet.</p>
+<p>
+  No players on your team yet.
+  <a href="{{ url_for('players_browse') }}">Browse players</a> to add some!
+</p>
 {% endif %}
+
+<a href="{{ url_for('players_browse') }}">Add More Players</a>
 
 <a href="{{ url_for('teams_edit', id=team.id) }}">Edit Team</a>
 <form
