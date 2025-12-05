@@ -40,12 +40,5 @@ def load_user(user_id):
 
 from routes import *
 
-# Initialize database tables on startup
-with app.app_context():
-    from models import User, Team, Player
-
-    db.create_all()
-    print("Database tables initialized!")
-
 if __name__ == "__main__":
     app.run(debug=True)
