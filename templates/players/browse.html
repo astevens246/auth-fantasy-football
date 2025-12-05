@@ -11,7 +11,8 @@
     <ul>
       {% for player in players_qb %}
       <li>
-        <strong>{{ player.name }}</strong> - {{ player.nfl_team }} {% for team
+        {% if player.rank %}<strong>#{{ player.rank }}</strong> {% endif
+        %}<strong>{{ player.name }}</strong> - {{ player.nfl_team }} {% for team
         in teams %}
         <form
           method="POST"
@@ -36,7 +37,8 @@
     <ul>
       {% for player in players_rb %}
       <li>
-        <strong>{{ player.name }}</strong> - {{ player.nfl_team }} {% for team
+        {% if player.rank %}<strong>#{{ player.rank }}</strong> {% endif
+        %}<strong>{{ player.name }}</strong> - {{ player.nfl_team }} {% for team
         in teams %}
         <form
           method="POST"
@@ -61,7 +63,8 @@
     <ul>
       {% for player in players_wr %}
       <li>
-        <strong>{{ player.name }}</strong> - {{ player.nfl_team }} {% for team
+        {% if player.rank %}<strong>#{{ player.rank }}</strong> {% endif
+        %}<strong>{{ player.name }}</strong> - {{ player.nfl_team }} {% for team
         in teams %}
         <form
           method="POST"
@@ -86,7 +89,8 @@
     <ul>
       {% for player in players_te %}
       <li>
-        <strong>{{ player.name }}</strong> - {{ player.nfl_team }} {% for team
+        {% if player.rank %}<strong>#{{ player.rank }}</strong> {% endif
+        %}<strong>{{ player.name }}</strong> - {{ player.nfl_team }} {% for team
         in teams %}
         <form
           method="POST"
