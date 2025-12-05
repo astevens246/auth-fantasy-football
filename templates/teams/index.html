@@ -3,9 +3,10 @@
 <a href="{{ url_for('teams_new') }}">Create New Team</a> |
 <a href="{{ url_for('players_browse') }}">Browse Players</a>
 
-{% if teams %}
+<h2>Your Teams</h2>
+{% if my_teams %}
 <ul>
-  {% for team in teams %}
+  {% for team in my_teams %}
   <li>
     <a href="{{ url_for('teams_show', id=team.id) }}">{{ team.name }}</a>
     <span>Created: {{ team.created_at.strftime('%Y-%m-%d') }}</span>
@@ -17,4 +18,18 @@
   You don't have any teams yet.
   <a href="{{ url_for('teams_new') }}">Create your first team!</a>
 </p>
+{% endif %}
+
+<h2>All Teams</h2>
+{% if all_teams %}
+<ul>
+  {% for team in all_teams %}
+  <li>
+    <a href="{{ url_for('teams_show', id=team.id) }}">{{ team.name }}</a>
+    <span>by {{ team.user.username }} - Created: {{ team.created_at.strftime('%Y-%m-%d') }}</span>
+  </li>
+  {% endfor %}
+</ul>
+{% else %}
+<p>No teams yet.</p>
 {% endif %} {% endblock %}

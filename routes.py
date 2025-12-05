@@ -61,8 +61,9 @@ def logout():
 @app.route("/teams")
 @login_required
 def teams_index():
-    teams = Team.query.filter_by(user_id=current_user.id).all()
-    return render_template("teams/index.html", teams=teams)
+    my_teams = Team.query.filter_by(user_id=current_user.id).all()
+    all_teams = Team.query.all()
+    return render_template("teams/index.html", my_teams=my_teams, all_teams=all_teams)
 
 
 @app.route("/teams/new", methods=["GET", "POST"])
@@ -82,10 +83,7 @@ def teams_new():
 @login_required
 def teams_show(id):
     team = Team.query.get_or_404(id)
-    # Authorization: only team owner can view
-    if team.user_id != current_user.id:
-        flash("You can only view your own team!", "danger")
-        return redirect(url_for("teams_index"))
+    is_owner = team.user_id == current_user.id
 
     # Get players on this team, organized by position
     all_players = Player.query.filter_by(team_id=team.id).all()
@@ -116,6 +114,7 @@ def teams_show(id):
     return render_template(
         "teams/show.html",
         team=team,
+        is_owner=is_owner,
         players_qb=players_qb,
         players_rb=players_rb,
         players_wr=players_wr,

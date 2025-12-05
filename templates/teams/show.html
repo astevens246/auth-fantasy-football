@@ -2,6 +2,10 @@
 <h1>{{ team.name }}</h1>
 <p>Created: {{ team.created_at.strftime('%Y-%m-%d') }}</p>
 
+{% if not is_owner %}
+<p><strong>Owner:</strong> {{ team.user.username }}</p>
+{% endif %}
+
 <h2>Roster ({{ roster_stats.total }}/{{ roster_stats.max_total }})</h2>
 <p>
   QB: {{ roster_stats.qb }}/{{ roster_stats.max_qb }} | RB: {{ roster_stats.rb }}/{{ roster_stats.max_rb }} | 
@@ -17,6 +21,7 @@
       {% for player in players_qb %}
       <li>
         {% if player.rank %}#{{ player.rank }} {% endif %}{{ player.name }} - {{ player.nfl_team }}
+        {% if is_owner %}
         <form
           method="POST"
           action="{{ url_for('players_remove_from_team', team_id=team.id, player_id=player.id) }}"
@@ -24,6 +29,7 @@
         >
           <button type="submit" onclick="return confirm('Remove {{ player.name }}?')">Remove</button>
         </form>
+        {% endif %}
       </li>
       {% endfor %}
     </ul>
@@ -40,6 +46,7 @@
       {% for player in players_rb %}
       <li>
         {% if player.rank %}#{{ player.rank }} {% endif %}{{ player.name }} - {{ player.nfl_team }}
+        {% if is_owner %}
         <form
           method="POST"
           action="{{ url_for('players_remove_from_team', team_id=team.id, player_id=player.id) }}"
@@ -47,6 +54,7 @@
         >
           <button type="submit" onclick="return confirm('Remove {{ player.name }}?')">Remove</button>
         </form>
+        {% endif %}
       </li>
       {% endfor %}
     </ul>
@@ -63,6 +71,7 @@
       {% for player in players_wr %}
       <li>
         {% if player.rank %}#{{ player.rank }} {% endif %}{{ player.name }} - {{ player.nfl_team }}
+        {% if is_owner %}
         <form
           method="POST"
           action="{{ url_for('players_remove_from_team', team_id=team.id, player_id=player.id) }}"
@@ -70,6 +79,7 @@
         >
           <button type="submit" onclick="return confirm('Remove {{ player.name }}?')">Remove</button>
         </form>
+        {% endif %}
       </li>
       {% endfor %}
     </ul>
@@ -86,6 +96,7 @@
       {% for player in players_te %}
       <li>
         {% if player.rank %}#{{ player.rank }} {% endif %}{{ player.name }} - {{ player.nfl_team }}
+        {% if is_owner %}
         <form
           method="POST"
           action="{{ url_for('players_remove_from_team', team_id=team.id, player_id=player.id) }}"
@@ -93,6 +104,7 @@
         >
           <button type="submit" onclick="return confirm('Remove {{ player.name }}?')">Remove</button>
         </form>
+        {% endif %}
       </li>
       {% endfor %}
     </ul>
@@ -102,6 +114,7 @@
   </div>
 </div>
 
+{% if is_owner %}
 <a href="{{ url_for('players_browse') }}">Add More Players</a> |
 <a href="{{ url_for('teams_edit', id=team.id) }}">Edit Team</a> |
 <form
@@ -111,5 +124,6 @@
 >
   <button type="submit" onclick="return confirm('Delete team?')">Delete Team</button>
 </form>
+{% endif %}
 <a href="{{ url_for('teams_index') }}">Back to My Teams</a>
 {% endblock %}
