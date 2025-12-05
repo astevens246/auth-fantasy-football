@@ -13,6 +13,7 @@ class User(db.Model, UserMixin):
     updated_at = db.Column(
         db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow
     )
+    date_of_birth = db.Column(db.Date, nullable=True)
 
     # One-to-many relationship with Team
     teams = db.relationship("Team", backref="user", lazy=True)
