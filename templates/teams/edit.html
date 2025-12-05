@@ -1,0 +1,16 @@
+{% extends "base.html" %} {% block content %}
+<h1>Edit Team</h1>
+<form method="POST">
+  {{ form.hidden_tag() }}
+  <div>
+    {{ form.name.label }}<br />
+    {{ form.name() }} {% if form.name.errors %} {% for error in form.name.errors
+    %}
+    <span style="color: red">{{ error }}</span>
+    {% endfor %} {% endif %}
+  </div>
+  <div>{{ form.submit() }}</div>
+</form>
+<a href="{{ url_for('teams_show', id=team.id) }}">Cancel</a>
+<a href="{{ url_for('teams_index') }}">Back to My Teams</a>
+{% endblock %}

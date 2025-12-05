@@ -1,0 +1,27 @@
+{% extends "base.html" %} {% block content %}
+<h1>{{ team.name }}</h1>
+<p>Created: {{ team.created_at.strftime('%Y-%m-%d') }}</p>
+
+<h2>Players</h2>
+{% if players %}
+<ul>
+  {% for player in players %}
+  <li>{{ player.name }} - {{ player.position }} - {{ player.nfl_team }}</li>
+  {% endfor %}
+</ul>
+{% else %}
+<p>No players on your team yet.</p>
+{% endif %}
+
+<a href="{{ url_for('teams_edit', id=team.id) }}">Edit Team</a>
+<form
+  method="POST"
+  action="{{ url_for('teams_delete', id=team.id) }}"
+  style="display: inline"
+>
+  <button type="submit" onclick="return confirm('Delete team?')">
+    Delete Team
+  </button>
+</form>
+<a href="{{ url_for('teams_index') }}">Back to My Teams</a>
+{% endblock %}
