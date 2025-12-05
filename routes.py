@@ -1,7 +1,7 @@
 from flask import render_template, redirect, url_for, flash
 from flask_login import login_user, logout_user, login_required, current_user
 from app import app, db
-from models import User
+from models import User, Team
 from forms import LoginForm, SignupForm
 
 
@@ -54,4 +54,5 @@ def logout():
 @app.route("/teams")
 @login_required
 def teams_index():
-    return f"<h1>My Teams</h1><p>Welcome, {current_user.username}!</p><p>Teams page coming soon!</p>"
+    teams = Team.query.filter_by(user_id=current_user.id).all()
+    return render_template("teams/index.html", teams=teams)
