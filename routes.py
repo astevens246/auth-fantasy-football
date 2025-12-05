@@ -5,6 +5,9 @@ from models import User, Team, Player
 from forms import LoginForm, SignupForm, TeamForm
 
 
+# ========== AUTHENTICATION ROUTES ==========
+
+
 @app.route("/")
 def index():
     if current_user.is_authenticated:
@@ -49,6 +52,9 @@ def signup():
 def logout():
     logout_user()
     return redirect(url_for("login"))
+
+
+# ========== TEAM ROUTES (CRUD) ==========
 
 
 @app.route("/teams")
@@ -120,3 +126,52 @@ def teams_delete(id):
     db.session.commit()
     flash("Team deleted!", "success")
     return redirect(url_for("teams_index"))
+
+
+# ========== PLAYER ROUTES ==========
+
+
+@app.route("/players")
+@login_required
+def players_browse():
+    # Query: get all players where team_id is None
+    players = Player.query.filter_by(team_id=None).all()
+    return render_template("players/browse.html", players=players)
+
+
+@app.route("/teams/<int:team_id>/players/<int:player_id>/add", methods=["POST"])
+@login_required
+def players_add_to_team(team_id, player_id):
+    team = Team.query.get_or_404(team_id)
+    # Authorization: only team owner can add players
+    if team.user_id != current_user.id:
+        flash("You can only add players to your own team!", "danger")
+        return redirect(url_for("teams_index"))
+
+    player = Player.query.get_or_404(player_id)
+    # Add player to team
+    player.team_id = team_id
+    db.session.commit()
+    flash(f"{player.name} added to {team.name}!", "success")
+    return redirect(url_for("teams_show", id=team_id))
+
+
+@app.route("/teams/<int:team_id>/players/<int:player_id>/remove", methods=["POST"])
+@login_required
+def players_remove_from_team(team_id, player_id):
+    team = Team.query.get_or_404(team_id)
+    if team.user_id != current_user.id:
+        flash("You can only remove players from your own team!", "danger")
+        return redirect(url_for("teams_index"))
+
+    player = Player.query.get_or_404(player_id)
+    # Verify player is on this team
+    if player.team_id != team_id:
+        flash("This player is not on this team!", "danger")
+        return redirect(url_for("teams_show", id=team_id))
+
+    # Remove player from team
+    player.team_id = None
+    db.session.commit()
+    flash(f"{player.name} removed from {team.name}!", "success")
+    return redirect(url_for("teams_show", id=team_id))
