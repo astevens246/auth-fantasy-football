@@ -193,10 +193,13 @@ def teams_edit(id):
 @login_required
 def teams_delete(id):
     team = Team.query.get_or_404(id)
-    # Authorization: only team owner can delete
+    # Authorization: only team owner can delete, and only if team is active
     if team.user_id != current_user.id:
         flash("You can only delete your own team!", "danger")
         return redirect(url_for("teams_index"))
+    if not team.is_active():
+        flash("This team is too old to delete!", "warning")
+        return redirect(url_for("teams_show", id=team.id))
 
     # Remove players from team (set team_id to None)
     Player.query.filter_by(team_id=team.id).update({Player.team_id: None})
