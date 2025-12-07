@@ -135,7 +135,7 @@ def teams_show(id):
     players_te = [p for p in all_players if p.position == "TE"]
 
     # Roster limits for display
-    MAX_TOTAL_PLAYERS = 8
+    MAX_TOTAL_PLAYERS = 10
     MAX_PER_POSITION = {"QB": 2, "RB": 3, "WR": 3, "TE": 2}
 
     # Calculate roster stats
@@ -327,7 +327,7 @@ def players_add_to_team(team_id, player_id):
         return redirect(url_for("players_browse"))
 
     # Roster limits
-    MAX_TOTAL_PLAYERS = 8
+    MAX_TOTAL_PLAYERS = 10
     MAX_PER_POSITION = {"QB": 2, "RB": 3, "WR": 3, "TE": 2}
 
     # Get current roster
