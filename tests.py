@@ -125,6 +125,51 @@ class TestRoutes(unittest.TestCase):
             user = User.query.filter_by(username='newuser').first()
             self.assertIsNotNone(user)  # User should exist
             self.assertEqual(user.email, 'newuser@test.com')
+    
+    # ========== TEST 5: Team Creation (POST) ==========
+    def test_team_creation(self):
+        """Test that a logged-in user can create a team."""
+        # SCENARIO: Create a user and log them in
+        self.create_user(username='testuser', password='password123')
+        
+        # Get user ID from database
+        with app.app_context():
+            user = User.query.filter_by(username='testuser').first()
+            user_id = user.id
+        
+        # Login first
+        login_data = {
+            'username': 'testuser',
+            'password': 'password123'
+        }
+        self.app.post('/login', data=login_data, follow_redirects=True)
+        
+        # SCENARIO: Create a team via POST request
+        form_data = {
+            'name': 'My Test Team'
+        }
+        res = self.app.post('/teams/new', data=form_data, follow_redirects=True)
+        
+        # EXPECTATION: Status code should be 200
+        self.assertEqual(res.status_code, 200)
+        
+        # EXPECTATION: Team should be created in database
+        with app.app_context():
+            team = Team.query.filter_by(name='My Test Team').first()
+            self.assertIsNotNone(team)  # Team should exist
+            self.assertEqual(team.user_id, user_id)  # Team should belong to the user
+    
+    # ========== TEST 6: Authorization - Protected Route ==========
+    def test_protected_route_redirects(self):
+        """Test that protected routes redirect to login when not authenticated."""
+        # SCENARIO: Try to access /teams without logging in
+        res = self.app.get('/teams', follow_redirects=True)
+        
+        # EXPECTATION: Should redirect to login page
+        # ACTUAL: Check the page content
+        result_page_text = res.get_data(as_text=True)
+        # Should see login page content
+        self.assertIn('Login', result_page_text)
 
 
 if __name__ == '__main__':
