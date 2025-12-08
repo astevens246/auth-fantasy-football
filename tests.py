@@ -79,6 +79,52 @@ class TestRoutes(unittest.TestCase):
         # We expect to see something from the teams page (like "Teams" or team-related content)
         # This confirms we were redirected after login
         self.assertIn('Teams', result_page_text)
+    
+    # ========== TEST 3: Login Failure (POST) ==========
+    def test_login_failure(self):
+        """Test that login fails with incorrect password."""
+        # SCENARIO: Create a user with password 'password123'
+        self.create_user(username='testuser', password='password123')
+        
+        # SCENARIO: Try to login with wrong password
+        form_data = {
+            'username': 'testuser',
+            'password': 'wrongpassword'  # Wrong password!
+        }
+        res = self.app.post('/login', data=form_data)
+        
+        # EXPECTATION: Status code should be 200 (page loads, but login fails)
+        self.assertEqual(res.status_code, 200)
+        
+        # EXPECTATION: Should show error message
+        result_page_text = res.get_data(as_text=True)
+        # Check for the error flash message
+        self.assertIn('Invalid', result_page_text)
+    
+    # ========== TEST 4: Signup Success (POST) ==========
+    def test_signup_success(self):
+        """Test that signup creates a new user and logs them in."""
+        # SCENARIO: Make a POST request to /signup with form data
+        form_data = {
+            'username': 'newuser',
+            'email': 'newuser@test.com',
+            'password': 'password123',
+            'confirm_password': 'password123'  # Must match password
+        }
+        res = self.app.post('/signup', data=form_data, follow_redirects=True)
+        
+        # EXPECTATION: Status code should be 200
+        self.assertEqual(res.status_code, 200)
+        
+        # EXPECTATION: Should redirect to teams page after signup
+        result_page_text = res.get_data(as_text=True)
+        self.assertIn('Teams', result_page_text)
+        
+        # EXPECTATION: User should be created in database
+        with app.app_context():
+            user = User.query.filter_by(username='newuser').first()
+            self.assertIsNotNone(user)  # User should exist
+            self.assertEqual(user.email, 'newuser@test.com')
 
 
 if __name__ == '__main__':
