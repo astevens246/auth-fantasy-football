@@ -137,7 +137,7 @@
 
 {% if can_edit %}
 <a href="{{ url_for('players_browse') }}">Add More Players</a> |
-<a href="{{ url_for('teams_edit', id=team.id) }}">Edit Team</a> |
+<a href="{{ url_for('teams_edit', id=team.id) }}">Edit Team Name</a> |
 <form
   method="POST"
   action="{{ url_for('teams_delete', id=team.id) }}"
