@@ -44,34 +44,6 @@ A full-stack web application built with Flask that allows users to create and ma
 - **Protected Routes**: Login required for team and player management
 - **Active Team Restrictions**: Only active teams can be edited or modified
 
-## Technology Stack
-
-- **Backend**: Flask (Python web framework)
-- **Database**: SQLite (local) / PostgreSQL (production)
-- **ORM**: SQLAlchemy
-- **Authentication**: Flask-Login, Flask-Bcrypt
-- **Forms**: Flask-WTF, WTForms
-- **Migrations**: Flask-Migrate
-
-## Database Models
-
-### User
-
-- Stores user account information (username, email, password hash)
-- One-to-many relationship with Teams
-
-### Team
-
-- Represents a fantasy football team
-- Belongs to a User
-- Has many Players
-- Tracks creation date for season-based activation
-
-### Player
-
-- Stores NFL player information (name, position, NFL team, rank)
-- Can belong to one Team (or be a free agent)
-
 ## Routes
 
 ### Authentication (4 routes)
