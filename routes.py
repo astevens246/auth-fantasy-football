@@ -260,8 +260,6 @@ def players_browse():
                             existing.rank = rank
                         skipped += 1
         db.session.commit()
-        if count > 0:
-            flash(f"Imported {count} new players from CSV!", "success")
 
     # Query: get all players where team_id is None, organized by position and ranked
     # Players are unique across ALL teams - if team_id is set, they're unavailable

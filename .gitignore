@@ -33,6 +33,5 @@ Thumbs.db
 .env
 .env.local
 
-# CSV files (if you don't want to commit player data)
-*.csv
+
 
